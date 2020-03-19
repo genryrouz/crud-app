@@ -1,0 +1,135 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  title CRUD приложение
+  link(rel='stylesheet', href='styles.css')
+
+.container
+  form(action='javascript:void(0);', method='POST', onsubmit='app.Add()')
+   .input-element
+     input#add-name(type='text', placeholder='New name')
+   
+     input#add-address(type='text', placeholder='New address')
+   
+     input#add-number(type='text', placeholder='New number')    
+   .button-add
+     input(type='submit', value='Отправить')
+   .file-form  
+    .button-file
+      | Выбрать файл
+      input(type="file" id="get_the_file")
+  form#saveEdit(action='javascript:void(0);', method='POST', onsubmit='app.Edit()')      
+   .button-send
+     input(type='submit', value='Изменить')
+table
+  tr
+    th Название
+    th Адрес
+    th Номер телефона
+    th
+    th
+  tbody#hospitals
+
+
+script.
+  var app = new function() {
+  this.el = document.getElementById('hospitals');
+
+  document.getElementById("get_the_file").addEventListener("change", function() {
+  var file_to_read = document.getElementById("get_the_file").files[0];
+  var fileread = new FileReader();
+  self = this;
+  fileread.onload = function(e) {
+  var content = e.target.result;
+  var intern = JSON.parse(content);
+  localStorage.setItem('Больницы', JSON.stringify(intern));
+  console.log(1);
+  };
+  fileread.readAsText(file_to_read);
+  });
+
+  Hospitals = JSON.parse(localStorage.getItem('Больницы'));
+
+
+  console.log(Hospitals);
+
+  this.Add = function () {
+      ea = document.getElementById('add-name');
+      address = document.getElementById('add-address');
+      number = document.getElementById('add-number');
+     
+    
+      var hospitalname = ea.value;
+      var hospitaladdress = address.value;
+      var hospitalnumber = number.value;
+
+         if ((hospitalname == '') && (hospitaladdress == '') && (hospitalnumber == '')){
+        alert('Введите значения!')
+        } else {
+
+      Hospitals["Hospital"].push({ "full_name": hospitalname, "address": hospitaladdress, "number": hospitalnumber});
+      localStorage.setItem('Больницы', JSON.stringify(Hospitals));
+
+      ea.value = '';
+      address.value = '';
+      number.value = '';
+
+      console.log(Hospitals);
+      console.log(Hospitals.Hospital.length);
+      this.FetchAll();
+  }
+  }
+
+  
+
+  this.FetchAll = function() {
+  var data = '';
+  for (var i = 0; i < Hospitals.Hospital.length; i++){
+      data += '<tr>';
+      data += '<td>' + Hospitals.Hospital[i].full_name + '</td>' + '<td>' + Hospitals.Hospital[i].address + '</td>' + '<td>' + Hospitals.Hospital[i].number + '</td>';
+      data += '<td><button onclick="app.Edit(' + i + ')">Изменить</button></td>';
+      data += '<td><button onclick="app.Delete(' + i + ')">Удалить</button></td>';
+      data += '</tr>';
+  }
+  return this.el.innerHTML = data;
+  }
+  this.FetchAll();
+
+
+  
+  this.Edit = function (item) {
+  var ea = document.getElementById('add-name');
+  var address = document.getElementById('add-address');
+  var number = document.getElementById('add-number');
+  ea.value = Hospitals.Hospital[item].full_name;
+  address.value = Hospitals.Hospital[item].address;
+  number.value = Hospitals.Hospital[item].number;
+
+
+  self = this;
+  document.getElementById('saveEdit').onsubmit = function() {
+  var hospitalname = ea.value;
+  var hospitaladdress = address.value;
+  var hospitalnumber = number.value;
+
+
+  Hospitals.Hospital[item].full_name = hospitalname;
+  Hospitals.Hospital[item].address = hospitaladdress;
+  Hospitals.Hospital[item].number = hospitalnumber;
+  console.log(Hospitals); 
+  localStorage.setItem('Больницы', JSON.stringify(Hospitals));
+  ea.value = '';
+  address.value = '';
+  number.value = '';
+  self.FetchAll();
+    
+  }
+  };
+  this.Delete = function (item) {
+  Hospitals.Hospital.splice(item,1);
+  console.log(Hospitals);
+  localStorage.setItem('Больницы', JSON.stringify(Hospitals));
+  this.FetchAll();
+  };
+  }
+  
